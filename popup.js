@@ -11,10 +11,13 @@
   // Default McGraw Hill config (hardcoded as requested)
   const DEFAULT_CONFIG = {
     profileName: "McGraw Hill",
-    rootSelector: "frame[id='clo-iframe']",
+    rootSelector: "iframe",
     subRootSelector: "body",
-    nextBtnSelector: "button[aria-label='Next'], .next-button",
-    stopCondition: { selector: "button[disabled]", type: "exists" },
+    nextBtnSelector: "button[id='next-button']",
+    stopCondition: {
+      selector: "button[id='next-button'][disabled]",
+      type: "exists"
+    },
     delay: 500
   };
 
@@ -143,26 +146,33 @@
       return;
     }
     showStatus('Starting…', true);
+    btnStart.disabled = true;
     chrome.runtime.sendMessage({ type: 'START_SCRAPING', config: result.config }, (response) => {
       if (chrome.runtime.lastError) {
         showStatus('Error: ' + chrome.runtime.lastError.message, false);
+        refreshUI();
         return;
       }
       if (response && !response.ok) {
         showStatus(response.error ? 'Error: ' + response.error : 'Start failed.', false);
+        refreshUI();
         return;
       }
       showStatus('Reloading book tab – scraping will start automatically.', true);
+      refreshUI();
     });
   }
 
   function stopScraping() {
+    btnStop.disabled = true;
     chrome.runtime.sendMessage({ type: 'STOP_SCRAPING' }, (response) => {
       if (chrome.runtime.lastError) {
         showStatus('Error: ' + chrome.runtime.lastError.message, false);
+        refreshUI();
         return;
       }
       showStatus('Stopped.', false);
+      refreshUI();
     });
   }
 
@@ -202,6 +212,12 @@
   btnStop.addEventListener('click', stopScraping);
   btnSaveProfile.addEventListener('click', saveCurrentAsNewProfile);
   btnExport.addEventListener('click', exportBook);
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'local' && changes[STORAGE_KEYS.STATE]) {
+      refreshUI();
+    }
+  });
 
   loadProfiles().then(({ profiles, activeId }) => {
     if (!profiles.__default__) {
