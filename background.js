@@ -19,9 +19,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
   if (message.type === 'START_SCRAPING') {
     const config = message.config;
+    // Clear previous book content before starting
     chrome.storage.local.set({
       [STORAGE_KEYS.STATE]: 'running',
-      [STORAGE_KEYS.CONFIG]: config
+      [STORAGE_KEYS.CONFIG]: config,
+      scraper_full_book_content: ''
     }).then(() => {
       chrome.action.setIcon({
         path: { 16: 'icons/icon_active16.png', 48: 'icons/icon_active48.png', 128: 'icons/icon_active128.png' }

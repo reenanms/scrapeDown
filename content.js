@@ -158,13 +158,6 @@ function runLoop() {
       log('runLoop: config profile=', config.profileName);
       const delay = Math.max(500, Number(config.delay) || 3000);
 
-      if (stopConditionMet(config)) {
-        log('Stop condition met – stopping');
-        chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
-        chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
-        return;
-      }
-
       scrapePage(config).then((result) => {
         if (!result.ok) {
           log('Scrape failed:', result.reason, '- retrying in', delay, 'ms');
@@ -174,6 +167,13 @@ function runLoop() {
         log('Scraped', result.markdown ? result.markdown.length : 0, 'chars');
         if (result.markdown) {
           appendAndPersist(result.markdown).then(() => {
+            // Check stop condition AFTER saving the current page
+            if (stopConditionMet(config)) {
+              log('Stop condition met – stopping');
+              chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
+              chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
+              return;
+            }
             const clicked = clickNext(config);
             log('Next button clicked:', clicked);
             if (clicked) {
