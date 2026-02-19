@@ -24,7 +24,15 @@
   // Optional: full structure with titleSelectors for compatibility
   const DEFAULT_CONFIG_FULL = {
     ...DEFAULT_CONFIG,
-    titleSelectors: ["h1", "h2", "h3", ".chapter-title"]
+    titleSelectors: ["h1", "h2", "h3", ".chapter-title"],
+    // Example: Remove "Return to Figure" links
+    replacements: [
+      {
+        pattern: "\\[Return to [^\\]]+\\.\\]\\(javascript:void\\(0\\);\\)",
+        flags: "g",
+        replacement: ""
+      }
+    ]
   };
 
   const select = document.getElementById('profileSelect');

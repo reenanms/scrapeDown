@@ -1,3 +1,19 @@
+// Apply text replacements to markdown using config.replacements
+function applyReplacements(markdown, config) {
+  if (!config || !Array.isArray(config.replacements)) return markdown;
+  let result = markdown;
+  for (const rep of config.replacements) {
+    if (rep.pattern) {
+      try {
+        const re = new RegExp(rep.pattern, rep.flags || 'g');
+        result = result.replace(re, rep.replacement || '');
+      } catch (e) {
+        warn('Invalid replacement pattern:', rep.pattern, e.message);
+      }
+    }
+  }
+  return result;
+}
 'use strict';
 
 const LOG_PREFIX = '[Universal Book Scraper]';
@@ -113,6 +129,8 @@ async function scrapePage(config) {
   let markdown = '';
   try {
     markdown = turndown.turndown(clone);
+    // Apply replacements if configured
+    markdown = applyReplacements(markdown, config);
   } catch (e) {
     return { ok: false, markdown: '', reason: String(e.message) };
   }
