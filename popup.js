@@ -202,6 +202,7 @@
       const running = data[STORAGE_KEYS.STATE] === 'running';
       btnStart.disabled = running;
       btnStop.disabled = !running;
+      btnExport.disabled = running;
       if (running) showStatus('Scraping is running. Use Stop to end.', true);
     });
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
