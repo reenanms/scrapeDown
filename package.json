@@ -1,0 +1,12 @@
+{
+  "name": "universal-book-scraper",
+  "version": "1.0.0",
+  "description": "Configurable Chrome Extension for scraping book content to Markdown",
+  "scripts": {
+    "postinstall": "node -e \"const fs=require('fs');const path=require('path');const p=path.join('node_modules','turndown','lib','turndown.browser.umd.js');const out=path.join('vendor','turndown.js');if(fs.existsSync(p)){fs.mkdirSync('vendor',{recursive:true});fs.copyFileSync(p,out);console.log('Copied turndown.js to vendor/');}else{console.warn('Turndown not found at '+p);}\""
+  },
+  "devDependencies": {},
+  "optionalDependencies": {
+    "turndown": "^7.1.2"
+  }
+}

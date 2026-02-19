@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Book Scraper</title>
+  <style>
+    :root {
+      --bg: #1a1b26;
+      --surface: #24283b;
+      --border: #414868;
+      --text: #c0caf5;
+      --accent: #7aa2f7;
+      --accent-hover: #89b4fa;
+      --success: #9ece6a;
+      --danger: #f7768e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      width: 420px;
+      min-height: 320px;
+      margin: 0;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+    }
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+    }
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      padding: 10px;
+      margin-bottom: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    button {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #btnStart {
+      background: var(--success);
+      color: var(--bg);
+    }
+    #btnStart:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+    #btnStop {
+      background: var(--danger);
+      color: #fff;
+    }
+    #btnStop:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    button.secondary {
+      flex: 0 1 auto;
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+    button.secondary:hover:not(:disabled) {
+      background: var(--border);
+    }
+    .status {
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: var(--surface);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .status.running { color: var(--success); }
+    .status.stopped { color: var(--text); }
+    .hint {
+      font-size: 12px;
+      color: var(--border);
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <h1>Universal Book Scraper</h1>
+  <label for="profileSelect">Scraping Profile</label>
+  <select id="profileSelect">
+    <option value="__default__">McGraw Hill</option>
+    <option value="__new__">Create New...</option>
+  </select>
+  <label for="configJson">Configuration JSON</label>
+  <textarea id="configJson" placeholder='Paste or edit your profile JSON here...'></textarea>
+  <p class="hint">1. Open your <strong>book reader page</strong> in the tab you want to scrape.<br>2. Open this popup and click <strong>Start</strong> (that tab will reload and scraping will begin).</p>
+  <div class="buttons">
+    <button id="btnStart" type="button">Start</button>
+    <button id="btnStop" type="button">Stop</button>
+    <button id="btnSaveProfile" type="button" class="secondary" style="display:none;">Save as profile</button>
+    <button id="btnExport" type="button" class="secondary">Copy book</button>
+  </div>
+  <div id="status" class="status stopped">Ready. Select a profile and click Start.</div>
+  <script src="popup.js"></script>
+</body>
+</html>

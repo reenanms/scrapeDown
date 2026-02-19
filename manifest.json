@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Universal Book Scraper",
+  "version": "1.0.0",
+  "description": "Configurable book scraper with profile system and HTML-to-Markdown conversion",
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "action": { "default_popup": "popup.html" },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["vendor/turndown.js", "content.js"],
+    "run_at": "document_idle"
+  }],
+  "web_accessible_resources": [{ "resources": ["vendor/turndown.js"], "matches": ["<all_urls>"] }]
+}
