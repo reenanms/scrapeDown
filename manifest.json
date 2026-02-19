@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Universal Book Scraper",
+  "name": "ScrapeDown",
   "version": "1.0",
   "description": "A configurable extension to scrape book content from web pages.",
   "permissions": [
@@ -17,7 +17,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Universal Book Scraper",
+    "default_title": "ScrapeDown",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",

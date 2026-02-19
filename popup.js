@@ -10,7 +10,7 @@
 
   // Default McGraw Hill config (hardcoded as requested)
   const DEFAULT_CONFIG = {
-    profileName: "McGraw Hill",
+    profileName: "McGraw Hill Books",
     rootSelector: "iframe",
     subRootSelector: "body",
     nextBtnSelector: "button[id='next-button']",
@@ -85,7 +85,7 @@
     select.innerHTML = '';
     const defaultOpt = document.createElement('option');
     defaultOpt.value = '__default__';
-    defaultOpt.textContent = 'McGraw Hill';
+    defaultOpt.textContent = 'McGraw Hill Books';
     select.appendChild(defaultOpt);
     const newOpt = document.createElement('option');
     newOpt.value = '__new__';
