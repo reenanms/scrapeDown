@@ -16,6 +16,16 @@ function warn() {
   console.warn.apply(console, [LOG_PREFIX].concat(Array.prototype.slice.call(arguments)));
 }
 
+const SESSION_PAGE_COUNT_KEY = 'scraper_session_page_count';
+async function getSessionPageCount() {
+  const data = await chrome.storage.local.get([SESSION_PAGE_COUNT_KEY]);
+  return Number(data[SESSION_PAGE_COUNT_KEY]) || 0;
+}
+
+async function setSessionPageCount(val) {
+  await chrome.storage.local.set({ [SESSION_PAGE_COUNT_KEY]: val });
+}
+
 function getTurndownService() {
   if (typeof TurndownService === 'undefined') {
     warn('TurndownService not defined – ensure vendor/turndown.js is loaded before content.js');
@@ -24,12 +34,14 @@ function getTurndownService() {
   return new TurndownService({ headingStyle: 'atx' });
 }
 
-function getConfig() {
-  return chrome.storage.local.get([STORAGE_KEYS.CONFIG]).then((data) => data[STORAGE_KEYS.CONFIG] || null);
+async function getConfig() {
+  const data = await chrome.storage.local.get([STORAGE_KEYS.CONFIG]);
+  return data[STORAGE_KEYS.CONFIG] || null;
 }
 
-function getState() {
-  return chrome.storage.local.get([STORAGE_KEYS.STATE]).then((data) => data[STORAGE_KEYS.STATE] || 'stopped');
+async function getState() {
+  const data = await chrome.storage.local.get([STORAGE_KEYS.STATE]);
+  return data[STORAGE_KEYS.STATE] || 'stopped';
 }
 
 function ensureTitleTags(root, titleSelectors) {
@@ -79,11 +91,11 @@ function getRoot(config) {
  
 }
 
-function scrapePage(config) {
+async function scrapePage(config) {
   const root = getRoot(config);
   if (!root) {
     log('Root not found for selector');
-    return Promise.resolve({ ok: false, markdown: '', reason: 'root not found' });
+    return { ok: false, markdown: '', reason: 'root not found' };
   }
 
   log('Scraping root found, length:', root.innerText ? root.innerText.length : 0);
@@ -95,23 +107,32 @@ function scrapePage(config) {
   const turndown = getTurndownService();
   if (!turndown) {
     warn('TurndownService not loaded – check extension console for errors');
-    return Promise.resolve({ ok: false, markdown: '', reason: 'TurndownService not loaded' });
+    return { ok: false, markdown: '', reason: 'TurndownService not loaded' };
   }
 
   let markdown = '';
   try {
     markdown = turndown.turndown(clone);
   } catch (e) {
-    return Promise.resolve({ ok: false, markdown: '', reason: String(e.message) });
+    return { ok: false, markdown: '', reason: String(e.message) };
   }
-  return Promise.resolve({ ok: true, markdown });
+  return { ok: true, markdown };
 }
 
+
 function stopConditionMet(config) {
+  // Stop if pageLimit is set and reached (relative to session start)
+  // Accept sessionPageCount as an argument for reload persistence
+  let sessionCount = arguments.length > 1 ? arguments[1] : 0;
+  if (typeof config.pageLimit === 'number' && config.pageLimit > 0) {
+    if (sessionCount >= config.pageLimit) {
+      log('Page limit reached:', config.pageLimit);
+      return true;
+    }
+  }
   const stop = config.stopCondition;
   if (!stop || stop.type !== 'exists')
     return false;
-  
   try {
     log('Checking stop condition selector:', stop.selector);
     return !!document.querySelector(stop.selector);
@@ -134,84 +155,79 @@ function clickNext(config) {
   return false;
 }
 
-function appendAndPersist(markdown) {
+async function appendAndPersist(markdown) {
   log('Appending scraped content, length:', markdown.length);
-  return chrome.storage.local.get([STORAGE_KEYS.FULL_BOOK]).then((data) => {
-    const existing = data[STORAGE_KEYS.FULL_BOOK] || '';
-    const sep = existing ? '\n\n---\n\n' : '';
-    const next = existing + sep + markdown;
-    return chrome.storage.local.set({ [STORAGE_KEYS.FULL_BOOK]: next });
-  });
+  const data = await chrome.storage.local.get([STORAGE_KEYS.FULL_BOOK]);
+  const existing = data[STORAGE_KEYS.FULL_BOOK] || '';
+  const sep = existing ? '\n\n---\n\n' : '';
+  const next = existing + sep + markdown;
+  await chrome.storage.local.set({ [STORAGE_KEYS.FULL_BOOK]: next });
 }
 
-function runLoop() {
-  getState().then((state) => {
-    if (state !== 'running') {
-      log('runLoop: state is', state, '- exiting');
+async function runLoop() {
+  const state = await getState();
+  if (state !== 'running') {
+    log('runLoop: state is', state, '- exiting');
+    return;
+  }
+  const config = await getConfig();
+  if (!config) {
+    warn('runLoop: no config in storage');
+    return;
+  }
+  log('runLoop: config profile=', config.profileName);
+  const delay = Math.max(500, Number(config.delay) || 3000);
+
+  const sessionPageCount = await getSessionPageCount();
+  const result = await scrapePage(config);
+  if (!result.ok) {
+    log('Scrape failed:', result.reason, '- retrying in', delay, 'ms');
+    setTimeout(runLoop, delay);
+    return;
+  }
+  log('Scraped', result.markdown ? result.markdown.length : 0, 'chars');
+  if (result.markdown) {
+    await setSessionPageCount(sessionPageCount + 1);
+    await appendAndPersist(result.markdown);
+    const updatedCount = await getSessionPageCount();
+    // Check stop condition AFTER saving the current page
+    if (stopConditionMet(config, updatedCount)) {
+      log('Stop condition met – stopping');
+      await chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
+      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
       return;
     }
-    getConfig().then((config) => {
-      if (!config) {
-        warn('runLoop: no config in storage');
-        return;
-      }
-      log('runLoop: config profile=', config.profileName);
-      const delay = Math.max(500, Number(config.delay) || 3000);
-
-      scrapePage(config).then((result) => {
-        if (!result.ok) {
-          log('Scrape failed:', result.reason, '- retrying in', delay, 'ms');
-          setTimeout(runLoop, delay);
-          return;
-        }
-        log('Scraped', result.markdown ? result.markdown.length : 0, 'chars');
-        if (result.markdown) {
-          appendAndPersist(result.markdown).then(() => {
-            // Check stop condition AFTER saving the current page
-            if (stopConditionMet(config)) {
-              log('Stop condition met – stopping');
-              chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
-              chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
-              return;
-            }
-            const clicked = clickNext(config);
-            log('Next button clicked:', clicked);
-            if (clicked) {
-              log('Reloading in', delay, 'ms');
-              setTimeout(() => location.reload(), delay);
-            } else {
-              log('No next button – stopping');
-              chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
-              chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
-            }
-          });
-        } else {
-          const clicked = clickNext(config);
-          if (clicked) setTimeout(() => location.reload(), delay);
-          else {
-            chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
-            chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
-          }
-        }
-      });
-    });
-  });
+    const clicked = clickNext(config);
+    log('Next button clicked:', clicked);
+    if (clicked) {
+      log('Reloading in', delay, 'ms');
+      setTimeout(() => location.reload(), delay);
+    } else {
+      log('No next button – stopping');
+      await chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
+      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
+    }
+  } else {
+    const clicked = clickNext(config);
+    if (clicked) setTimeout(() => location.reload(), delay);
+    else {
+      await chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
+      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
+    }
+  }
 }
 
-function init() {
+async function init() {
   try {
-    getState().then((state) => {
-      log('Init: state=', state);
-      if (state === 'running') {
-        const delay = 1500;
-        log('Running in', delay, 'ms...');
-        setTimeout(runLoop, delay);
-      }
-    }).catch((err) => {
-      warn('Init error:', err);
-    });
-  } catch (e) {
-    warn('Init failed:', e);
+    const state = await getState();
+    log('Init: state=', state);
+    if (state === 'running') {
+      const delay = 1500;
+      log('Running in', delay, 'ms...');
+      setTimeout(runLoop, delay);
+    }
+  } catch (err) {
+    warn('Init error:', err);
   }
 }
 

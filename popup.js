@@ -29,6 +29,7 @@
 
   const select = document.getElementById('profileSelect');
   const textarea = document.getElementById('configJson');
+  const pageLimitInput = document.getElementById('pageLimit');
   const btnStart = document.getElementById('btnStart');
   const btnStop = document.getElementById('btnStop');
   const btnSaveProfile = document.getElementById('btnSaveProfile');
@@ -94,8 +95,20 @@
 
   function getCurrentConfigFromTextarea() {
     const raw = textarea.value.trim();
-    if (!raw) return { ok: true, config: { ...DEFAULT_CONFIG_FULL } };
-    return parseConfigJson(raw);
+    let baseConfig = { ...DEFAULT_CONFIG_FULL };
+    if (raw) {
+      const parsed = parseConfigJson(raw);
+      if (!parsed.ok) return parsed;
+      baseConfig = parsed.config;
+    }
+    // Add pageLimit from input if set
+    const pageLimitVal = pageLimitInput.value.trim();
+    if (pageLimitVal && !isNaN(Number(pageLimitVal))) {
+      baseConfig.pageLimit = Number(pageLimitVal);
+    } else {
+      delete baseConfig.pageLimit;
+    }
+    return { ok: true, config: baseConfig };
   }
 
   function applyConfigToTextarea(config) {

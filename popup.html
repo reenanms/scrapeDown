@@ -137,9 +137,11 @@
     <option value="__default__">McGraw Hill</option>
     <option value="__new__">Create New...</option>
   </select>
+  <label for="pageLimit">Page Limit (optional)</label>
+  <input id="pageLimit" type="number" min="1" placeholder="Leave blank for all pages" style="width:100%;margin-bottom:12px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;" />
   <label for="configJson">Configuration JSON</label>
   <textarea id="configJson" placeholder='Paste or edit your profile JSON here...'></textarea>
-  <p class="hint">1. Open your <strong>book reader page</strong> in the tab you want to scrape.<br>2. Open this popup and click <strong>Start</strong> (that tab will reload and scraping will begin).</p>
+  <p class="hint">1. Open your <strong>book reader page</strong> in the tab you want to scrape.<br>2. Set a page limit if you want to stop after a fixed number of pages.<br>3. Open this popup and click <strong>Start</strong> (that tab will reload and scraping will begin).</p>
   <div class="buttons">
     <button id="btnStart" type="button">Start</button>
     <button id="btnStop" type="button">Stop</button>
