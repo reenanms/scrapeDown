@@ -44,4 +44,6 @@
       "run_at": "document_end"
     }
   ]
+  ,
+  "privacy_policy": "https://github.com/reenanms/scrapeDown/blob/main/PRIVACY_POLICY.md"
 }
