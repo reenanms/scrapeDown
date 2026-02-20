@@ -36,5 +36,12 @@
       "resources": [ "vendor/turndown.js" ],
       "matches": [ "http://*/*", "https://*/*" ]
     }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js", "vendor/turndown.js"],
+      "run_at": "document_end"
+    }
   ]
 }

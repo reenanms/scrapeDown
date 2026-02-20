@@ -16,7 +16,7 @@ function applyReplacements(markdown, config) {
 }
 'use strict';
 
-const LOG_PREFIX = '[Universal Book Scraper]';
+const LOG_PREFIX = '[ScrapeDown]';
 
 const STORAGE_KEYS = {
   STATE: 'scraper_state',
