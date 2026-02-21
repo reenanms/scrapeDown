@@ -1,4 +1,5 @@
-// Apply text replacements to markdown using config.replacements
+'use strict';
+
 function applyReplacements(markdown, config) {
   if (!config || !Array.isArray(config.replacements)) return markdown;
   let result = markdown;
@@ -14,7 +15,6 @@ function applyReplacements(markdown, config) {
   }
   return result;
 }
-'use strict';
 
 const LOG_PREFIX = '[ScrapeDown]';
 

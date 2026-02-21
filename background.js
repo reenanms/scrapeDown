@@ -2,7 +2,7 @@
 
 const STORAGE_KEYS = { STATE: 'scraper_state', CONFIG: 'scraper_config' };
 
-function reloadActiveTab() {
+async function reloadActiveTab() {
   return (async () => {
     const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     if (tabs[0]) await chrome.tabs.reload(tabs[0].id);
@@ -10,7 +10,7 @@ function reloadActiveTab() {
   })();
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, _sender, sendResponse) => {
   if (message.type === 'SET_ICON') {
     const base = message.running ? 'icons/icon_active' : 'icons/icon';
     (async () => {
@@ -70,7 +70,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return false;
 });
 
-chrome.storage.onChanged.addListener((changes, areaName) => {
+chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName !== 'local') return;
   const stateChange = changes.scraper_state;
   if (!stateChange) return;

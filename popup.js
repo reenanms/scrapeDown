@@ -159,8 +159,6 @@
   }
 
   function startScraping() {
-    console.log('startScraping: called');
-
     const result = getCurrentConfigFromTextarea();
     if (!result.ok) {
       showStatus('Invalid JSON: ' + result.error, false);
