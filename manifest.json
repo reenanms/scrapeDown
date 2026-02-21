@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "ScrapeDown",
-  "version": "1.0",
+  "version": "1.1",
   "description": "A configurable extension to scrape book content from web pages.",
   "permissions": [
     "storage",
-    "activeTab",
-    "scripting"
+    "tabs"
   ],
   "host_permissions": [
     "http://*/*",
@@ -40,10 +39,8 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["content.js", "vendor/turndown.js"],
+      "js": ["vendor/turndown.js", "content.js"],
       "run_at": "document_end"
     }
   ]
-  ,
-  "privacy_policy": "https://github.com/reenanms/scrapeDown/blob/main/PRIVACY_POLICY.md"
 }
