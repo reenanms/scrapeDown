@@ -18,7 +18,7 @@
       selector: "button[id='next-button'][disabled]",
       type: "exists"
     },
-    delay: 500
+    delay: 800
   };
 
   // Optional: full structure with titleSelectors for compatibility
@@ -28,9 +28,14 @@
     // Example: Remove "Return to Figure" links
     replacements: [
       {
-        pattern: "\\[Return to [^\\]]+\\.\\]\\(javascript:void\\(0\\);\\)",
+        pattern: "\\[Return to [^\\]]+\\]\\(javascript:void\\(0\\);\\)",
         flags: "g",
         replacement: ""
+      },
+      {
+        pattern: "\\(javascript:void\\(0\\);.*\\)",
+        flags: "g",
+        replacement: "\(\)"
       }
     ]
   };

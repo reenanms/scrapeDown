@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ScrapeDown",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A configurable extension to scrape book content from web pages.",
   "permissions": [
     "storage"
@@ -27,8 +27,14 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["vendor/turndown.js", "content.js"],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "vendor/turndown.js",
+        "content.js"
+      ],
       "run_at": "document_end"
     }
   ]

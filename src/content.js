@@ -75,7 +75,7 @@ function ensureTitleTags(root, titleSelectors) {
         el.parentNode.insertBefore(wrap, el);
         wrap.appendChild(el);
       });
-    } catch (_) {}
+    } catch (_) { }
   });
 }
 
@@ -96,7 +96,7 @@ function getRoot(config) {
 
   const subRootSel = (config.subRootSelector || '').trim();
   if (!subRootSel)
-     return root;
+    return root;
 
   log('Looking getting sub-root content from:', root);
   const iframeDoc = root.contentDocument || root.contentWindow.document;
@@ -104,7 +104,7 @@ function getRoot(config) {
   const subRoot = iframeDoc.querySelector(subRootSel);
   return subRoot;
 
- 
+
 }
 
 async function scrapePage(config) {
@@ -152,8 +152,9 @@ function stopConditionMet(config) {
   if (!stop || stop.type !== 'exists')
     return false;
   try {
+    const root = getRoot(config) || document;
     log('Checking stop condition selector:', stop.selector);
-    return !!document.querySelector(stop.selector);
+    return !!root.querySelector(stop.selector);
   } catch (_) {
     log('Invalid stop condition selector:', stop.selector);
     return false;
@@ -164,12 +165,13 @@ function clickNext(config) {
   const sel = config.nextBtnSelector;
   if (!sel) return false;
   try {
-    const btn = document.querySelector(sel);
+    const root = getRoot(config) || document;
+    const btn = root.querySelector(sel);
     if (btn && !btn.disabled) {
       btn.click();
       return true;
     }
-  } catch (_) {}
+  } catch (_) { }
   return false;
 }
 
@@ -212,7 +214,7 @@ async function runLoop() {
     if (stopConditionMet(config, updatedCount)) {
       log('Stop condition met – stopping');
       await chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
-      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
+      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => { });
       return;
     }
     const clicked = clickNext(config);
@@ -223,14 +225,16 @@ async function runLoop() {
     } else {
       log('No next button – stopping');
       await chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
-      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
+      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => { });
     }
   } else {
     const clicked = clickNext(config);
+    log('Next button clicked:', clicked);
     if (clicked) setTimeout(() => location.reload(), delay);
     else {
+      log('No next button – stopping');
       await chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
-      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => {});
+      await chrome.runtime.sendMessage({ type: 'SET_ICON', running: false }).catch(() => { });
     }
   }
 }
