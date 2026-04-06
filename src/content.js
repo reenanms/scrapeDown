@@ -161,12 +161,22 @@ function stopConditionMet(config) {
   }
 }
 
+function getButton(listRoots, sel) {
+  for (const root of listRoots) {
+    const btn = root.querySelector(sel);
+    if (btn) {
+      return btn;
+    }
+  }
+  return null;
+}
+
 function clickNext(config) {
   const sel = config.nextBtnSelector;
   if (!sel) return false;
   try {
-    const root = getRoot(config) || document;
-    const btn = root.querySelector(sel);
+    const root = getRoot(config);
+    const btn = getButton([root, document], sel);
     if (btn && !btn.disabled) {
       btn.click();
       return true;
@@ -220,8 +230,8 @@ async function runLoop() {
     const clicked = clickNext(config);
     log('Next button clicked:', clicked);
     if (clicked) {
-      log('Reloading in', delay, 'ms');
-      setTimeout(() => location.reload(), delay);
+      log('Continuing in', delay, 'ms');
+      setTimeout(runLoop, delay);
     } else {
       log('No next button – stopping');
       await chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
@@ -230,7 +240,7 @@ async function runLoop() {
   } else {
     const clicked = clickNext(config);
     log('Next button clicked:', clicked);
-    if (clicked) setTimeout(() => location.reload(), delay);
+    if (clicked) setTimeout(runLoop, delay);
     else {
       log('No next button – stopping');
       await chrome.storage.local.set({ [STORAGE_KEYS.STATE]: 'stopped' });
