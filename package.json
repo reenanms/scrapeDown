@@ -1,0 +1,24 @@
+{
+  "name": "universal-book-scraper",
+  "version": "1.0.4",
+  "description": "Configurable Chrome Extension for scraping book content to Markdown",
+  "scripts": {
+    "test": "jest",
+    "build": "esbuild src/content.js --bundle --outfile=dist/content.js && esbuild src/background.js --bundle --outfile=dist/background.js && esbuild src/popup.js --bundle --outfile=dist/popup.js",
+    "postinstall": "node -e \"const fs=require('fs');const path=require('path');const p=path.join('node_modules','turndown','lib','turndown.browser.umd.js');const out=path.join('src','vendor','turndown.js');if(fs.existsSync(p)){fs.mkdirSync(path.join('src','vendor'),{recursive:true});fs.copyFileSync(p,out);console.log('Copied turndown.js to src/vendor/');}else{console.warn('Turndown not found at '+p);}\""
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "babel-jest": "^30.3.0",
+    "esbuild": "^0.28.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0"
+  },
+  "optionalDependencies": {
+    "turndown": "^7.1.2"
+  },
+  "jest": {
+    "testEnvironment": "jsdom"
+  }
+}

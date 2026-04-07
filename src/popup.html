@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,11 @@
       --success: #9ece6a;
       --danger: #f7768e;
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
       width: 420px;
@@ -26,18 +31,21 @@
       color: var(--text);
       font-size: 13px;
     }
+
     h1 {
       margin: 0 0 12px 0;
       font-size: 16px;
       font-weight: 600;
       color: var(--accent);
     }
+
     label {
       display: block;
       margin-bottom: 4px;
       font-weight: 500;
       color: var(--text);
     }
+
     select {
       width: 100%;
       padding: 8px 10px;
@@ -49,10 +57,12 @@
       font-size: 13px;
       cursor: pointer;
     }
+
     select:focus {
       outline: none;
       border-color: var(--accent);
     }
+
     textarea {
       width: 100%;
       min-height: 160px;
@@ -66,15 +76,18 @@
       font-size: 12px;
       resize: vertical;
     }
+
     textarea:focus {
       outline: none;
       border-color: var(--accent);
     }
+
     .buttons {
       display: flex;
       gap: 8px;
       margin-top: 12px;
     }
+
     button {
       flex: 1;
       padding: 10px 16px;
@@ -85,33 +98,41 @@
       cursor: pointer;
       transition: background 0.15s;
     }
+
     #btnStart {
       background: var(--success);
       color: var(--bg);
     }
+
     #btnStart:hover:not(:disabled) {
       filter: brightness(1.1);
     }
+
     #btnStop {
       background: var(--danger);
       color: #fff;
     }
+
     #btnStop:hover:not(:disabled) {
       filter: brightness(1.1);
     }
+
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
+
     button.secondary {
       flex: 0 1 auto;
       background: var(--surface);
       color: var(--accent);
       border: 1px solid var(--border);
     }
+
     button.secondary:hover:not(:disabled) {
       background: var(--border);
     }
+
     .status {
       margin-top: 10px;
       padding: 8px 10px;
@@ -120,8 +141,15 @@
       font-size: 12px;
       color: var(--text);
     }
-    .status.running { color: var(--success); }
-    .status.stopped { color: var(--text); }
+
+    .status.running {
+      color: var(--success);
+    }
+
+    .status.stopped {
+      color: var(--text);
+    }
+
     .hint {
       font-size: 12px;
       color: var(--border);
@@ -130,6 +158,7 @@
     }
   </style>
 </head>
+
 <body>
   <h1>ScrapeDown</h1>
   <label for="profileSelect">Scraping Profile</label>
@@ -138,10 +167,13 @@
     <option value="__new__">Create New...</option>
   </select>
   <label for="pageLimit">Page Limit (optional)</label>
-  <input id="pageLimit" type="number" min="1" placeholder="Leave blank for all pages" style="width:100%;margin-bottom:12px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;" />
+  <input id="pageLimit" type="number" min="1" placeholder="Leave blank for all pages"
+    style="width:100%;margin-bottom:12px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;" />
   <label for="configJson">Configuration JSON</label>
   <textarea id="configJson" placeholder='Paste or edit your profile JSON here...'></textarea>
-  <p class="hint">1. Open your <strong>book reader page</strong> in the tab you want to scrape.<br>2. Set a page limit if you want to stop after a fixed number of pages.<br>3. Open this popup and click <strong>Start</strong> (that tab will reload and scraping will begin).</p>
+  <p class="hint">1. Open your <strong>book reader page</strong> in the tab you want to scrape.<br>2. Set a page limit
+    if you want to stop after a fixed number of pages.<br>3. Open this popup and click <strong>Start</strong> (that tab
+    will reload and scraping will begin).</p>
   <div class="buttons">
     <button id="btnStart" type="button">Start</button>
     <button id="btnStop" type="button">Stop</button>
@@ -149,6 +181,7 @@
     <button id="btnExport" type="button" class="secondary">Copy book</button>
   </div>
   <div id="status" class="status stopped">Ready. Select a profile and click Start.</div>
-  <script src="popup.js"></script>
+  <script src="../dist/popup.js"></script>
 </body>
+
 </html>
