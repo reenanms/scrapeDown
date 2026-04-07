@@ -94,8 +94,8 @@ export class ScraperEngine {
         const root = domService.getRoot();
 
         if (!root) {
-            this.log('Root not found for selector, retrying...');
-            setTimeout(() => this.runLoop(), delay);
+            this.log('Root not found for selector...');
+            await this.stopScraping();
             return;
         }
 
