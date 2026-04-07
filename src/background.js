@@ -10,12 +10,20 @@ async function reloadActiveTab() {
 }
 
 async function setIconState(running) {
-  const base = running ? 'icons/icon_active' : 'icons/icon';
+  const base = running ? '/src/icons/icon_active' : '/src/icons/icon';
+  const paths = {
+    16: `${base}16.png`,
+    32: `${base}32.png`,
+    48: `${base}48.png`,
+    128: `${base}128.png`
+  };
+  console.log('[ScrapeDown] Setting icon state, running=', running, paths);
   try {
-    await chrome.action.setIcon({
-      path: { 16: `${base}16.png`, 48: `${base}48.png`, 128: `${base}128.png` }
-    });
-  } catch (e) { }
+    await chrome.action.setIcon({ path: paths });
+    console.log('[ScrapeDown] Icon set successfully.');
+  } catch (e) {
+    console.error('[ScrapeDown] Failed to set icon:', e);
+  }
 }
 
 MessagingService.addListener((message, _sender, sendResponse) => {

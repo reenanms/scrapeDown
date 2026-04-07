@@ -5,16 +5,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ScrapeDown</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #1a1b26;
-      --surface: #24283b;
-      --border: #414868;
-      --text: #c0caf5;
-      --accent: #7aa2f7;
-      --accent-hover: #89b4fa;
-      --success: #9ece6a;
-      --danger: #f7768e;
+      /* Light Theme (Default) */
+      --bg: #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.7);
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-soft: #64748b;
+      --accent: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      --accent-solid: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --ring: rgba(59, 130, 246, 0.2);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        /* Dark Theme - Tokyonight/Slate style */
+        --bg: #0f172a;
+        --card-bg: rgba(30, 41, 59, 0.7);
+        --surface: #1e293b;
+        --border: #334155;
+        --text: #f1f5f9;
+        --text-soft: #94a3b8;
+        --accent: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        --accent-solid: #60a5fa;
+        --ring: rgba(96, 165, 250, 0.2);
+      }
     }
 
     * {
@@ -22,165 +44,257 @@
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      width: 420px;
-      min-height: 320px;
+      font-family: 'Inter', system-ui, sans-serif;
+      width: 400px;
       margin: 0;
-      padding: 16px;
+      padding: 0;
       background: var(--bg);
       color: var(--text);
-      font-size: 13px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .container {
+      background: var(--surface);
+      border: none;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
     }
 
     h1 {
-      margin: 0 0 12px 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--accent);
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      font-weight: 700;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
     }
 
     label {
       display: block;
-      margin-bottom: 4px;
-      font-weight: 500;
-      color: var(--text);
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-soft);
     }
 
-    select {
+    select,
+    input[type="number"],
+    textarea {
       width: 100%;
-      padding: 8px 10px;
-      margin-bottom: 12px;
+      padding: 10px 12px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 10px;
       color: var(--text);
-      font-size: 13px;
-      cursor: pointer;
+      font-size: 14px;
+      outline: none;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
 
-    select:focus {
-      outline: none;
-      border-color: var(--accent);
+    select:focus,
+    input[type="number"]:focus,
+    textarea:focus {
+      border-color: var(--accent-solid);
+      box-shadow: 0 0 0 3px var(--ring);
     }
 
     textarea {
-      width: 100%;
-      min-height: 160px;
-      padding: 10px;
-      margin-bottom: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 12px;
+      min-height: 120px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 11px;
       resize: vertical;
     }
 
-    textarea:focus {
-      outline: none;
-      border-color: var(--accent);
+    .hint-box {
+      background: rgba(59, 130, 246, 0.05);
+      border-left: 3px solid var(--accent-solid);
+      padding: 10px 14px;
+      border-radius: 4px 10px 10px 4px;
+      margin-bottom: 20px;
+    }
+
+    .hint-box p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-soft);
     }
 
     .buttons {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .full-width {
+      grid-column: span 2;
     }
 
     button {
-      flex: 1;
-      padding: 10px 16px;
+      padding: 12px 16px;
       border: none;
-      border-radius: 6px;
-      font-size: 13px;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      z-index: 10;
+      transition: all 0.15s ease;
+      user-select: none;
     }
 
-    #btnStart {
-      background: var(--success);
-      color: var(--bg);
-    }
-
-    #btnStart:hover:not(:disabled) {
+    button:hover:not(:disabled) {
       filter: brightness(1.1);
+      transform: translateY(-1px);
     }
 
-    #btnStop {
+    button:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border: 1px solid transparent;
+    }
+
+    .btn-danger {
       background: var(--danger);
-      color: #fff;
+      color: #ffffff;
+      border: 1px solid transparent;
     }
 
-    #btnStop:hover:not(:disabled) {
+    .btn-danger:hover:not(:disabled) {
       filter: brightness(1.1);
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
     }
 
     button.secondary {
-      flex: 0 1 auto;
       background: var(--surface);
-      color: var(--accent);
-      border: 1px solid var(--border);
+      color: var(--text);
+      border: 1px solid var(--text-soft);
     }
 
     button.secondary:hover:not(:disabled) {
-      background: var(--border);
+      border-color: var(--text);
+      background: var(--bg);
     }
 
-    .status {
-      margin-top: 10px;
-      padding: 8px 10px;
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
+
+    .status-container {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
       background: var(--surface);
-      border-radius: 6px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .status-dot.running {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .status-text {
       font-size: 12px;
-      color: var(--text);
-    }
-
-    .status.running {
-      color: var(--success);
-    }
-
-    .status.stopped {
-      color: var(--text);
-    }
-
-    .hint {
-      font-size: 12px;
-      color: var(--border);
-      margin: 0 0 12px 0;
-      line-height: 1.4;
+      font-weight: 500;
     }
   </style>
 </head>
 
 <body>
-  <h1>ScrapeDown</h1>
-  <label for="profileSelect">Scraping Profile</label>
-  <select id="profileSelect">
-    <option value="__default__">McGraw Hill Books</option>
-    <option value="__new__">Create New...</option>
-  </select>
-  <label for="pageLimit">Page Limit (optional)</label>
-  <input id="pageLimit" type="number" min="1" placeholder="Leave blank for all pages"
-    style="width:100%;margin-bottom:12px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;" />
-  <label for="configJson">Configuration JSON</label>
-  <textarea id="configJson" placeholder='Paste or edit your profile JSON here...'></textarea>
-  <p class="hint">1. Open your <strong>book reader page</strong> in the tab you want to scrape.<br>2. Set a page limit
-    if you want to stop after a fixed number of pages.<br>3. Open this popup and click <strong>Start</strong> (that tab
-    will reload and scraping will begin).</p>
-  <div class="buttons">
-    <button id="btnStart" type="button">Start</button>
-    <button id="btnStop" type="button">Stop</button>
-    <button id="btnSaveProfile" type="button" class="secondary" style="display:none;">Save as profile</button>
-    <button id="btnExport" type="button" class="secondary">Copy book</button>
+  <div class="container">
+    <h1>ScrapeDown</h1>
+    <div class="subtitle">Book Scraper & Markdown Converter</div>
+
+    <div class="form-group">
+      <label for="profileSelect">Target Profile</label>
+      <select id="profileSelect">
+        <option value="__default__">McGraw Hill Books</option>
+        <option value="__new__">Create New...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="pageLimit">Total Pages (Limit)</label>
+      <input id="pageLimit" type="number" min="1" placeholder="All pages (no limit)">
+    </div>
+
+    <div class="form-group">
+      <label for="configJson">Strategy Configuration (JSON)</label>
+      <textarea id="configJson" spellcheck="false" placeholder='Define selectors here...'></textarea>
+    </div>
+
+    <div class="hint-box">
+      <p>Ensure your <strong>book tab</strong> is active, then click <strong>Start</strong>. The tab will reload and
+        begin capturing.</p>
+    </div>
+
+    <div class="buttons">
+      <button id="btnAction" type="button" class="btn-primary">Start Capture</button>
+      <button id="btnExport" type="button" class="secondary">Copy book</button>
+      <button id="btnSaveProfile" type="button" class="secondary full-width" style="display:none;">Save Profile</button>
+    </div>
+
+    <div class="status-container">
+      <div id="statusDot" class="status-dot"></div>
+      <div id="status" class="status-text">Ready to scrape.</div>
+    </div>
   </div>
-  <div id="status" class="status stopped">Ready. Select a profile and click Start.</div>
   <script src="../dist/popup.js"></script>
 </body>
 

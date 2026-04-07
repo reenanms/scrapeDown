@@ -84,8 +84,14 @@ export class ScraperEngine {
     }
 
     async runLoop() {
-        if (this.state !== 'running') return;
-        if (!this.config) return;
+        if (this.state !== 'running')
+            return;
+
+        if (!this.config) {
+            this.warn('Config is empty. Stopping.');
+            await this.stopScraping();
+            return;
+        }
 
         this.log('runLoop: config profile=', this.config.profileName);
         const delay = Math.max(500, Number(this.config.delay) || 3000);
@@ -94,7 +100,7 @@ export class ScraperEngine {
         const root = domService.getRoot();
 
         if (!root) {
-            this.log('Root not found for selector...');
+            this.log('Root not found for selector. Stopping.');
             await this.stopScraping();
             return;
         }
@@ -104,36 +110,38 @@ export class ScraperEngine {
         domService.sanitizeWatermarks(clone);
 
         const markdownService = new MarkdownService(this.config);
-        let markdown = '';
+        let markdown = null;
         try {
             markdown = markdownService.convertToMarkdown(clone);
         } catch (e) {
             this.warn('Markdown conversion failed:', e);
-            setTimeout(() => this.runLoop(), delay);
+        }
+
+        if (!markdown) {
+            this.log('Markdown is empty. Stopping.');
+            await this.stopScraping();
             return;
         }
 
-        if (markdown) {
-            const pageCount = await this.getSessionPageCount();
-            await this.setSessionPageCount(pageCount + 1);
-            await this.appendAndPersist(markdown);
+        const pageCount = await this.getSessionPageCount();
+        await this.setSessionPageCount(pageCount + 1);
+        await this.appendAndPersist(markdown);
 
-            const updatedCount = await this.getSessionPageCount();
-            if (this.stopConditionMet(updatedCount)) {
-                this.log('Stop condition met – stopping');
-                await this.stopScraping();
-                return;
-            }
+        const updatedCount = await this.getSessionPageCount();
+        if (this.stopConditionMet(updatedCount)) {
+            this.log('Stop condition met. Stopping.');
+            await this.stopScraping();
+            return;
         }
 
         const clicked = domService.clickNext();
-        this.log('Next button clicked:', clicked);
-        if (clicked) {
-            this.log('Continuing in', delay, 'ms');
-            setTimeout(() => this.runLoop(), delay);
-        } else {
-            this.log('No next button – stopping');
+        if (!clicked) {
+            this.log('No next button found. Stopping.');
             await this.stopScraping();
+            return;
         }
+
+        this.log('Continuing in', delay, 'ms');
+        setTimeout(() => this.runLoop(), delay);
     }
 }

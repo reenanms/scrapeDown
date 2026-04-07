@@ -8,15 +8,17 @@ const STORAGE_KEYS = { STATE: 'scraper_state' };
 const select = document.getElementById('profileSelect');
 const textarea = document.getElementById('configJson');
 const pageLimitInput = document.getElementById('pageLimit');
-const btnStart = document.getElementById('btnStart');
-const btnStop = document.getElementById('btnStop');
+const btnAction = document.getElementById('btnAction');
 const btnSaveProfile = document.getElementById('btnSaveProfile');
 const btnExport = document.getElementById('btnExport');
 const statusEl = document.getElementById('status');
+const statusDot = document.getElementById('statusDot');
 
 function showStatus(msg, isRunning) {
   statusEl.textContent = msg;
-  statusEl.className = 'status ' + (isRunning ? 'running' : 'stopped');
+  if (statusDot) {
+    statusDot.className = 'status-dot ' + (isRunning ? 'running' : '');
+  }
 }
 
 function rebuildProfileSelect(profiles, activeId) {
@@ -106,7 +108,7 @@ function startScraping() {
     return;
   }
   showStatus('Starting…', true);
-  btnStart.disabled = true;
+  btnAction.disabled = true;
 
   MessagingService.sendMessage({ type: 'START_SCRAPING', config: result.config })
     .then((response) => {
@@ -124,7 +126,7 @@ function startScraping() {
 }
 
 function stopScraping() {
-  btnStop.disabled = true;
+  btnAction.disabled = true;
   MessagingService.sendMessage({ type: 'STOP_SCRAPING' })
     .then(() => {
       showStatus('Stopped.', false);
@@ -140,11 +142,22 @@ async function refreshUI() {
   const data = await StorageService.get([STORAGE_KEYS.STATE]);
   const running = data[STORAGE_KEYS.STATE] === 'running';
 
-  btnStart.disabled = running;
-  btnStop.disabled = !running;
+  if (running) {
+    btnAction.textContent = 'Stop Capture';
+    btnAction.classList.remove('btn-primary');
+    btnAction.classList.add('btn-danger');
+  } else {
+    btnAction.textContent = 'Start Capture';
+    btnAction.classList.remove('btn-danger');
+    btnAction.classList.add('btn-primary');
+  }
+
+  btnAction.disabled = false;
   btnExport.disabled = running;
   if (running) {
     showStatus('Scraping is running. Use Stop to end.', true);
+  } else {
+    showStatus('Ready to scrape.', false);
   }
 
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -157,6 +170,7 @@ async function refreshUI() {
 }
 
 async function exportBook() {
+  console.log('[ScrapeDown] exportBook clicked');
   const data = await StorageService.get(['scraper_full_book_content']);
   const text = data.scraper_full_book_content || '';
   if (!text) {
@@ -171,9 +185,19 @@ async function exportBook() {
   }
 }
 
+async function toggleScraping() {
+  console.log('[ScrapeDown] toggleScraping clicked');
+  const data = await StorageService.get([STORAGE_KEYS.STATE]);
+  const running = data[STORAGE_KEYS.STATE] === 'running';
+  if (running) {
+    stopScraping();
+  } else {
+    startScraping();
+  }
+}
+
 select.addEventListener('change', onProfileChange);
-btnStart.addEventListener('click', startScraping);
-btnStop.addEventListener('click', stopScraping);
+btnAction.addEventListener('click', toggleScraping);
 btnSaveProfile.addEventListener('click', saveCurrentAsNewProfile);
 btnExport.addEventListener('click', exportBook);
 
@@ -181,12 +205,8 @@ StorageService.onChange((changes) => {
   if (changes[STORAGE_KEYS.STATE]) refreshUI();
 });
 
-ProfileManager.initDefaults().then(({ profiles, activeId }) => {
+ProfileManager.initDefaults().then(async ({ profiles, activeId }) => {
   rebuildProfileSelect(profiles, activeId);
-  if (activeId === '__default__') {
-    applyConfigToTextarea(DEFAULT_CONFIG);
-  } else if (activeId !== '__new__' && profiles[activeId]) {
-    applyConfigToTextarea(profiles[activeId]);
-  }
+  await onProfileChange();
   refreshUI();
 });
